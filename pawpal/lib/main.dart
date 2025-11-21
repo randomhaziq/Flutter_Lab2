@@ -39,6 +39,7 @@ class _PawPalState extends State<PawPal> {
         ),
       ),
       home: RegisterPage(),
+      // home: LoginPage(),
     );
   }
 }

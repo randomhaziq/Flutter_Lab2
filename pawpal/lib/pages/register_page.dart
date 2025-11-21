@@ -32,11 +32,11 @@ class _RegisterPageState extends State<RegisterPage> {
           //right side register form
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(8),
+              padding: EdgeInsets.all(16),
               child: Center(
                 child: Column(
                   children: [
-                    SizedBox(height: 40),
+                    SizedBox(height: 20),
                     Text(
                       "Register Here!",
                       style: TextStyle(
@@ -46,7 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         color: Colors.orange[700],
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 20),
                     TextField(
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.person),
@@ -116,8 +116,45 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: () {
+                        // TODO: Handle login action
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange[400],
+                      ),
+                      child: Text(
+                        'Register',
+                        style: TextStyle(fontSize: 18, color: Colors.black),
+                      ),
+                    ),
 
-                    ElevatedButton(onPressed: () {}),
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        // TODO: Handle register navigation
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Already have an account? ",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            "Login here.",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.blue[900],
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

@@ -84,6 +84,33 @@ class _LoginPageState extends State<LoginPage> {
                           style: TextStyle(fontSize: 18, color: Colors.black),
                         ),
                       ),
+
+                      SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: () {
+                          // TODO: Handle register navigation
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account? ",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            Text(
+                              "Register here.",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.blue[900],
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
