@@ -11,6 +11,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   bool isVisible1 = false;
   bool isVisible2 = false;
+  bool isLoading = false; //manage laoding state
 
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -270,6 +271,7 @@ class _RegisterPageState extends State<RegisterPage> {
               onPressed: () {
                 Navigator.of(context).pop();
                 // TODO: Handle register action
+                registerUser(name, email, password, phone);
               },
               child: Text("Register"),
             ),
@@ -280,6 +282,33 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Text("Cancel"),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void registerUser(
+    String name,
+    String email,
+    String password,
+    String phone,
+  ) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Registering..."),
+            ],
+          ),
         );
       },
     );
