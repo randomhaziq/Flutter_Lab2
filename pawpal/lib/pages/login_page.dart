@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -8,6 +9,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool isVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
           //left side login form
           Expanded(
             child: Container(
-              color: Colors.orange[100],
+              color: Colors.white,
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),
@@ -30,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
                           fontSize: 56,
                           fontFamily: "Bubblegum Sans",
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: Colors.orange[400],
                         ),
                       ),
                       Text(
@@ -42,24 +45,46 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.email),
                           labelText: 'Email',
-                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.orange),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.orange),
+                          ),
                         ),
                       ),
                       SizedBox(height: 20),
                       TextField(
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.lock),
-                          suffixIcon: Icon(Icons.visibility),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              isVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isVisible = !isVisible;
+                              });
+                            },
+                          ),
                           labelText: 'Password',
-                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.orange),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.orange),
+                          ),
                         ),
-                        obscureText: true,
+                        obscureText: isVisible ? false : true,
                       ),
 
                       //remember me checkbox
                       SizedBox(height: 20),
                       Row(
                         children: [
+                          //TODO: implement shared preferences for remember me
                           Checkbox(value: true, onChanged: (value) {}),
                           Text(
                             "Remember Me",
@@ -88,7 +113,12 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(height: 20),
                       GestureDetector(
                         onTap: () {
-                          // TODO: Handle register navigation
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RegisterPage(),
+                            ),
+                          );
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
           //right side with image
           Expanded(
             child: Container(
-              color: Colors.white,
+              color: Colors.orange[100],
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

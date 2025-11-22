@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -8,6 +9,15 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  bool isVisible1 = false;
+  bool isVisible2 = false;
+
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +57,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     SizedBox(height: 20),
+
+                    //full name
                     TextField(
+                      controller: nameController,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.person),
                         labelText: 'Full Name',
@@ -60,7 +73,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     SizedBox(height: 20),
+
+                    //email address
                     TextField(
+                      controller: emailController,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.email),
                         labelText: 'Email Address',
@@ -73,10 +89,24 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     SizedBox(height: 20),
+
+                    //create password
                     TextField(
+                      controller: passwordController,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.lock),
-                        suffixIcon: Icon(Icons.visibility_off),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isVisible1
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isVisible1 = !isVisible1;
+                            });
+                          },
+                        ),
                         labelText: 'Create Password',
                         enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.orange),
@@ -85,13 +115,27 @@ class _RegisterPageState extends State<RegisterPage> {
                           borderSide: BorderSide(color: Colors.orange),
                         ),
                       ),
-                      obscureText: true,
+                      obscureText: isVisible1 ? false : true,
                     ),
                     SizedBox(height: 20),
+
+                    //confirm password
                     TextField(
+                      controller: confirmPasswordController,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.lock),
-                        suffixIcon: Icon(Icons.visibility_off),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isVisible2
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isVisible2 = !isVisible2;
+                            });
+                          },
+                        ),
                         labelText: 'Confirm Password',
                         enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.orange),
@@ -100,10 +144,13 @@ class _RegisterPageState extends State<RegisterPage> {
                           borderSide: BorderSide(color: Colors.orange),
                         ),
                       ),
-                      obscureText: true,
+                      obscureText: isVisible2 ? false : true,
                     ),
                     SizedBox(height: 20),
+
+                    //phone number
                     TextField(
+                      controller: phoneController,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.phone),
                         labelText: 'Phone Number',
@@ -116,9 +163,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     SizedBox(height: 30),
+
+                    //register button
                     ElevatedButton(
                       onPressed: () {
-                        // TODO: Handle login action
+                        // TODO: Handle register action
+                        confirmRegisterDialog();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange[400],
@@ -132,7 +182,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(height: 20),
                     GestureDetector(
                       onTap: () {
-                        // TODO: Handle register navigation
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginPage()),
+                        );
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -145,7 +198,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           Text(
-                            "Login here.",
+                            "Login now.",
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.blue[900],
@@ -162,6 +215,73 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void confirmRegisterDialog() {
+    String name = nameController.text.trim();
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    String confirmPassword = confirmPasswordController.text.trim();
+    String phone = phoneController.text.trim();
+
+    if (name.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty ||
+        phone.isEmpty) {
+      SnackBar snackBar = SnackBar(content: Text("Please fill in all fields."));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    if (password != confirmPassword) {
+      SnackBar snackBar = SnackBar(content: Text("Passwords do not match."));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    if (!RegExp(
+      r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
+    ).hasMatch(email)) {
+      SnackBar snackBar = SnackBar(content: Text("Invalid email address."));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    if (!RegExp(r'^\d{10,11}$').hasMatch(phone)) {
+      SnackBar snackBar = SnackBar(
+        content: Text(
+          "Invalid phone number. Phone number must be between 10 and 11 digits.",
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Register an account?"),
+          content: Text("Do you want to register this account?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // TODO: Handle register action
+              },
+              child: Text("Register"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+          ],
+        );
+      },
     );
   }
 }

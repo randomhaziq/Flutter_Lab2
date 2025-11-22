@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pawpal/pages/home_page.dart';
 import 'pages/login_page.dart';
 
 //TODO: delete import below if not used
@@ -40,6 +41,7 @@ class _PawPalState extends State<PawPal> {
       ),
       home: RegisterPage(),
       // home: LoginPage(),
+      // home: HomePage(),
     );
   }
 }
