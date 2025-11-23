@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'login_page.dart';
+import 'package:pawpal/myconfig.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -168,7 +171,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     //register button
                     ElevatedButton(
                       onPressed: () {
-                        // TODO: Handle register action
                         confirmRegisterDialog();
                       },
                       style: ElevatedButton.styleFrom(
@@ -270,7 +272,6 @@ class _RegisterPageState extends State<RegisterPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // TODO: Handle register action
                 registerUser(name, email, password, phone);
               },
               child: Text("Register"),
@@ -304,7 +305,7 @@ class _RegisterPageState extends State<RegisterPage> {
         return AlertDialog(
           content: Row(
             children: [
-              CircularProgressIndicator(),
+              CircularProgressIndicator(color: Colors.orange),
               SizedBox(width: 20),
               Text("Registering..."),
             ],
@@ -312,5 +313,67 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       },
     );
+
+    await http
+        .post(
+          Uri.parse('${MyConfig.baseUrl}/pawpal/api/register.php'),
+          body: {
+            'name': name,
+            'email': email,
+            'password': password,
+            'phone': phone,
+          },
+        )
+        .then((response) {
+          if (response.statusCode == 200) {
+            var jsonResponse = response.body;
+            var resarray = json.decode(jsonResponse);
+
+            if (resarray['status'] == 'success') {
+              if (!mounted) return;
+              SnackBar snackBar = SnackBar(
+                content: Text("Registration successful!"),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            } else {
+              if (!mounted) return;
+              SnackBar snackBar = SnackBar(content: Text(resarray['message']));
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            }
+          } else {
+            if (!mounted) return;
+            SnackBar snackBar = SnackBar(
+              content: Text(
+                "Error during registration. Please try again later.",
+              ),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+        })
+        // Handle timeout if the request takes too long
+        .timeout(
+          Duration(seconds: 10),
+          onTimeout: () {
+            if (!mounted) return;
+            SnackBar snackBar = SnackBar(
+              content: Text("Request timed out. Please try again."),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          },
+        )
+        .catchError((error) {
+          if (!mounted) return;
+          SnackBar snackBar = SnackBar(
+            content: Text("An error occurred: $error"),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        });
+
+    if (isLoading) {
+      Navigator.of(context).pop(); //close the loading dialog
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }
