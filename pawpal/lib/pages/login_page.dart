@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'register_page.dart';
 
@@ -10,6 +11,16 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool isVisible = false;
+  bool isRemember = false;
+
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    loadPreferences();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +95,13 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(height: 20),
                       Row(
                         children: [
-                          //TODO: implement shared preferences for remember me
-                          Checkbox(value: true, onChanged: (value) {}),
+                          Checkbox(
+                            value: isRemember,
+                            onChanged: (value) {
+                              isRemember = value!;
+                              setState(() {});
+                            },
+                          ),
                           Text(
                             "Remember Me",
                             style: TextStyle(
@@ -100,6 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                       ElevatedButton(
                         onPressed: () {
                           // TODO: Handle login action
+                          loginUser();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange[400],
@@ -178,5 +195,62 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
     );
+  }
+
+  void loginUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (isRemember) {
+      if (emailController.text.isNotEmpty &&
+          passwordController.text.isNotEmpty) {
+        await prefs.setString('email', emailController.text);
+        await prefs.setString('password', passwordController.text);
+        await prefs.setBool('rememberMe', isRemember);
+
+        SnackBar snackBar = SnackBar(
+          content: Text('Preferences Saved Successfully'),
+          backgroundColor: Colors.green,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } else {
+        SnackBar snackBar = SnackBar(
+          content: Text('Please fill in all fields'),
+          backgroundColor: Colors.red,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    } else {
+      await prefs.remove('email');
+      await prefs.remove('password');
+      await prefs.remove('rememberMe');
+
+      SnackBar snackBar = SnackBar(
+        content: Text('Preferences Removed'),
+        backgroundColor: Colors.red,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      emailController.clear();
+      passwordController.clear();
+
+      setState(() {});
+    }
+  }
+
+  void loadPreferences() {
+    SharedPreferences.getInstance().then((prefs) {
+      bool? rememberMe = prefs.getBool('rememberMe');
+
+      if (rememberMe != null && rememberMe) {
+        String? email = prefs.getString('email');
+        String? password = prefs.getString('password');
+        isRemember = true;
+        emailController.text = email ?? '';
+        passwordController.text = password ?? '';
+      } else {
+        isRemember = false;
+      }
+
+      setState(() {});
+    });
   }
 }

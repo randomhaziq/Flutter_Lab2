@@ -335,6 +335,20 @@ class _RegisterPageState extends State<RegisterPage> {
                 content: Text("Registration successful!"),
               );
               ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+              if (isLoading) {
+                Navigator.of(context).pop(); //close the loading dialog
+                setState(() {
+                  isLoading = false;
+                });
+              }
+
+              //close the register dialog and Navigate to the login page
+              Navigator.of(context).pop();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
             } else {
               if (!mounted) return;
               SnackBar snackBar = SnackBar(content: Text(resarray['message']));

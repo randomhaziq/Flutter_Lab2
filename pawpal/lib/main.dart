@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pawpal/pages/home_page.dart';
-import 'pages/login_page.dart';
-
-//TODO: delete import below if not used
-import 'pages/register_page.dart';
+import 'package:pawpal/pages/register_page.dart';
 
 void main() {
   runApp(const PawPal());
@@ -20,6 +16,7 @@ class _PawPalState extends State<PawPal> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         appBarTheme: AppBarTheme(
@@ -40,8 +37,6 @@ class _PawPalState extends State<PawPal> {
         ),
       ),
       home: RegisterPage(),
-      // home: LoginPage(),
-      // home: HomePage(),
     );
   }
 }
