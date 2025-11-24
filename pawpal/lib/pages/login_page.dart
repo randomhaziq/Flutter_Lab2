@@ -1,6 +1,11 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:pawpal/myconfig.dart';
 import 'package:flutter/material.dart';
-import 'register_page.dart';
+import 'package:http/http.dart' as http;
+import 'package:pawpal/model/user.dart';
+import 'package:pawpal/pages/home_page.dart';
+import 'package:pawpal/pages/register_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,6 +17,9 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool isVisible = false;
   bool isRemember = false;
+  bool isLoading = false;
+
+  late User user;
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -52,7 +60,10 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(fontSize: 20, color: Colors.black87),
                       ),
                       SizedBox(height: 40),
+
+                      //email textfield
                       TextField(
+                        controller: emailController,
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.email),
                           labelText: 'Email',
@@ -65,7 +76,10 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       SizedBox(height: 20),
+
+                      //password textfield
                       TextField(
+                        controller: passwordController,
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.lock),
                           suffixIcon: IconButton(
@@ -111,13 +125,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ],
                       ),
-
                       SizedBox(height: 20),
+
+                      //login button
                       ElevatedButton(
-                        onPressed: () {
-                          // TODO: Handle login action
-                          loginUser();
-                        },
+                        onPressed: isLoading ? null : loginUser,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange[400],
                         ),
@@ -198,42 +210,57 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void loginUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (isRemember) {
-      if (emailController.text.isNotEmpty &&
-          passwordController.text.isNotEmpty) {
-        await prefs.setString('email', emailController.text);
-        await prefs.setString('password', passwordController.text);
-        await prefs.setBool('rememberMe', isRemember);
+    setState(() {
+      isLoading = true;
+    });
 
-        SnackBar snackBar = SnackBar(
-          content: Text('Preferences Saved Successfully'),
-          backgroundColor: Colors.green,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      } else {
-        SnackBar snackBar = SnackBar(
-          content: Text('Please fill in all fields'),
-          backgroundColor: Colors.red,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
-    } else {
-      await prefs.remove('email');
-      await prefs.remove('password');
-      await prefs.remove('rememberMe');
-
+    //validate inputs
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       SnackBar snackBar = SnackBar(
-        content: Text('Preferences Removed'),
+        content: Text('Please fill in all fields'),
         backgroundColor: Colors.red,
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-      emailController.clear();
-      passwordController.clear();
-
-      setState(() {});
+      return;
     }
+
+    //show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(color: Colors.orange),
+              SizedBox(width: 20),
+              Text("Logging in..."),
+            ],
+          ),
+        );
+      },
+    );
+
+    //authenticate user
+    bool loginSuccess = await authenticateUser(
+      emailController.text,
+      passwordController.text,
+    );
+
+    Navigator.pop(context); //close loading dialog
+
+    if (loginSuccess) {
+      await handleSharedPreferences();
+      // Navigate to HomePage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage(user: user)),
+      );
+    }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void loadPreferences() {
@@ -252,5 +279,70 @@ class _LoginPageState extends State<LoginPage> {
 
       setState(() {});
     });
+  }
+
+  Future<bool> authenticateUser(String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${MyConfig.baseUrl}/pawpal/api/login.php'),
+        body: {'email': email, 'password': password},
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['status'] == 'success') {
+          user = User.fromJson(jsonResponse['data']);
+
+          SnackBar snackBar = SnackBar(
+            content: Text('Login successful!'),
+            backgroundColor: Colors.green,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+          return true;
+        } else {
+          SnackBar snackBar = SnackBar(
+            content: Text('Login failed. Please check your credentials.'),
+            backgroundColor: Colors.red,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+          return false;
+        }
+      } else {
+        SnackBar snackBar = SnackBar(
+          content: Text('Server error. Please try again later.'),
+          backgroundColor: Colors.red,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        return false;
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occurred. Please try again later.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+  }
+
+  Future<void> handleSharedPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (isRemember) {
+      await prefs.setString('email', emailController.text);
+      await prefs.setString('password', passwordController.text);
+      await prefs.setBool('rememberMe', true);
+    } else {
+      await prefs.remove('email');
+      await prefs.remove('password');
+      await prefs.setBool('rememberMe', false);
+
+      emailController.clear();
+      passwordController.clear();
+      setState(() {});
+    }
   }
 }

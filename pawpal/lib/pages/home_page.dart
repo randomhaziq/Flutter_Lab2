@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart';
+import 'package:pawpal/model/user.dart';
+import 'package:pawpal/pages/login_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final User? user;
+
+  const HomePage({super.key, required this.user});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  //TODO: fetch the user's name from the user database
-  String? name;
+  User? currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    currentUser = widget.user;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +41,7 @@ class _HomePageState extends State<HomePage> {
         color: Colors.orange[100],
         child: Center(
           child: Text(
-            "Welcome to PawPal, $name!",
+            "Welcome to PawPal, ${currentUser!.userName}!",
             style: TextStyle(
               fontSize: 28,
               fontFamily: "Bubblegum Sans",
@@ -45,4 +53,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Future<void> getUserData() async {}
 }

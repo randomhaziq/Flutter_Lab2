@@ -1,8 +1,8 @@
+import 'dart:convert';
+import 'package:pawpal/myconfig.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'login_page.dart';
-import 'package:pawpal/myconfig.dart';
+import 'package:pawpal/pages/login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -248,6 +248,14 @@ class _RegisterPageState extends State<RegisterPage> {
       r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
     ).hasMatch(email)) {
       SnackBar snackBar = SnackBar(content: Text("Invalid email address."));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    if (password.length < 6) {
+      SnackBar snackBar = SnackBar(
+        content: Text("Password must be at least 6 characters long."),
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
     }
