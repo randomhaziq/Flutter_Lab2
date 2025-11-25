@@ -17,21 +17,21 @@ class User {
 
   User.fromJson(Map<String, dynamic> json) {
     userId = json['user_id'];
-    userName = json['user_name'];
-    userEmail = json['user_email'];
-    userPassword = json['user_password'];
-    userPhone = json['user_phone'];
-    userRegDate = json['user_regdate'];
+    userName = json['name'];
+    userEmail = json['email'];
+    userPassword = json['password'];
+    userPhone = json['phone'];
+    userRegDate = json['reg_date'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['user_id'] = userId;
-    data['user_name'] = userName;
-    data['user_email'] = userEmail;
-    data['user_password'] = userPassword;
-    data['user_phone'] = userPhone;
-    data['user_regdate'] = userRegDate;
+    data['name'] = userName;
+    data['email'] = userEmail;
+    data['password'] = userPassword;
+    data['phone'] = userPhone;
+    data['reg_date'] = userRegDate;
     return data;
   }
 }

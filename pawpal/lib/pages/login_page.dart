@@ -284,7 +284,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<bool> authenticateUser(String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('${MyConfig.baseUrl}/pawpal/api/login.php'),
+        Uri.parse('${MyConfig.baseUrl}/pawpal/api/login_user.php'),
         body: {'email': email, 'password': password},
       );
 
@@ -335,10 +335,15 @@ class _LoginPageState extends State<LoginPage> {
       await prefs.setString('email', emailController.text);
       await prefs.setString('password', passwordController.text);
       await prefs.setBool('rememberMe', true);
+      SnackBar snackBar = SnackBar(content: Text('Preferences saved.'));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } else {
       await prefs.remove('email');
       await prefs.remove('password');
       await prefs.setBool('rememberMe', false);
+
+      SnackBar snackBar = SnackBar(content: Text('Preferences removed.'));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       emailController.clear();
       passwordController.clear();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pawpal/pages/register_page.dart';
+import 'package:pawpal/pages/login_page.dart';
 
 void main() {
   runApp(const PawPal());
@@ -36,7 +36,7 @@ class _PawPalState extends State<PawPal> {
           iconTheme: IconThemeData(color: Colors.white),
         ),
       ),
-      home: RegisterPage(),
+      home: LoginPage(),
     );
   }
 }

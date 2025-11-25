@@ -324,7 +324,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     await http
         .post(
-          Uri.parse('${MyConfig.baseUrl}/pawpal/api/register.php'),
+          Uri.parse('${MyConfig.baseUrl}/pawpal/api/register_user.php'),
           body: {
             'name': name,
             'email': email,

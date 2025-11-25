@@ -53,6 +53,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  Future<void> getUserData() async {}
 }
