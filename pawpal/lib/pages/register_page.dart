@@ -352,7 +352,7 @@ class _RegisterPageState extends State<RegisterPage> {
               }
 
               //close the register dialog and Navigate to the login page
-              Navigator.of(context).pop();
+              // Navigator.of(context).pop();
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => LoginPage()),
