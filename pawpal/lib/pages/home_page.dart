@@ -3,9 +3,7 @@ import 'package:pawpal/model/user.dart';
 import 'package:pawpal/pages/login_page.dart';
 
 class HomePage extends StatefulWidget {
-  final User? user;
-
-  const HomePage({super.key, required this.user});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -17,7 +15,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    currentUser = widget.user;
   }
 
   @override
@@ -40,14 +37,20 @@ class _HomePageState extends State<HomePage> {
       body: Container(
         color: Colors.orange[100],
         child: Center(
-          child: Text(
-            "Welcome to PawPal, ${currentUser!.userName}!",
-            style: TextStyle(
-              fontSize: 28,
-              fontFamily: "Bubblegum Sans",
-              fontWeight: FontWeight.bold,
-              color: Colors.orange[600],
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Welcome to PawPal! ${currentUser?.userName ?? 'Guest'}',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Bubblegum Sans',
+                ),
+              ),
+              SizedBox(height: 20),
+              Icon(Icons.pets, size: 100, color: Colors.orange[400]),
+            ],
           ),
         ),
       ),
