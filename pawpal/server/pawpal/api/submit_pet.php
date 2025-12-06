@@ -18,7 +18,7 @@ $lat = isset($_POST['latitude']) ? $_POST['latitude'] : '';
 $lng = isset($_POST['longitude']) ? $_POST['longitude'] : '';
 
 // Validate required fields
-if (empty($user_id) || empty($pet_name)) {
+if (empty($user_id) || empty($pet_name) || empty($lat) || empty($lng)) {
     echo json_encode(array('status' => 'failed', 'message' => 'Missing required fields'));
     exit();
 }
