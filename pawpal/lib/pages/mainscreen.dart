@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'Package:pawpal/model/pet.dart';
+import 'package:http/http.dart' as http;
+import 'package:pawpal/model/pet.dart';
+import 'package:pawpal/model/user.dart';
+import 'package:pawpal/myconfig.dart';
+import 'package:pawpal/pages/submitPetScreen.dart';
 
 class BrowsePets extends StatefulWidget {
   const BrowsePets({super.key});
@@ -9,8 +15,16 @@ class BrowsePets extends StatefulWidget {
 }
 
 class _BrowsePetsState extends State<BrowsePets> {
-  Pet pet = Pet(); //TODO: fetch from backend
-  int maxPets = 25; //TODO: fetch from backend and convert to list
+  User? currentUser;
+  List<Pet> listPets = [];
+  bool isLoading = true;
+
+  TextEditingController searchController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    loadPets();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +64,37 @@ class _BrowsePetsState extends State<BrowsePets> {
                       onSubmitted: (value) => searchPets(value),
                     ),
                   ),
-                  SizedBox(width: 400),
+                  SizedBox(width: 20),
+
+                  // Submit Pet Button
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SubmitPetScreen(
+                            currentUser: currentUser ?? User(),
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange[400],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 15,
+                      ),
+                    ),
+                    child: const Text(
+                      'Submit Pet',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 200),
 
                   Text(
                     "Categories",
@@ -131,26 +175,29 @@ class _BrowsePetsState extends State<BrowsePets> {
 
           //bottom section
           Expanded(
-            child: ListView.builder(
-              itemCount: (maxPets / 2).ceil(),
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : listPets.isEmpty
+                ? Center(child: Text('No pets available'))
+                : ListView.builder(
+                    itemCount: (listPets.length / 2).ceil(),
+                    scrollDirection: Axis.vertical,
+                    itemBuilder: (BuildContext context, int index) {
+                      int firstIndex = index * 2;
+                      int secondIndex = firstIndex + 1;
 
-              scrollDirection: Axis.vertical,
-              itemBuilder: (BuildContext context, int index) {
-                int firstIndex = index * 2;
-                int secondIndex = firstIndex + 1;
-
-                return Row(
-                  children: [
-                    Expanded(child: showPetCard(firstIndex)),
-                    Expanded(
-                      child: secondIndex < maxPets
-                          ? showPetCard(secondIndex)
-                          : Container(),
-                    ),
-                  ],
-                );
-              },
-            ),
+                      return Row(
+                        children: [
+                          Expanded(child: showPetCard(firstIndex)),
+                          Expanded(
+                            child: secondIndex < listPets.length
+                                ? showPetCard(secondIndex)
+                                : Container(),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -160,6 +207,11 @@ class _BrowsePetsState extends State<BrowsePets> {
   void searchPets(String value) {}
 
   Widget showPetCard(int index) {
+    if (index >= listPets.length) {
+      return Container();
+    }
+
+    Pet pet = listPets[index];
     return Card(
       margin: const EdgeInsets.all(10),
       child: ListTile(
@@ -169,12 +221,16 @@ class _BrowsePetsState extends State<BrowsePets> {
           decoration: BoxDecoration(
             color: Colors.grey[300],
             borderRadius: BorderRadius.circular(8),
-            image: DecorationImage(
-              image: AssetImage(pet.imagePaths ?? 'assets/default_pet.png'),
-              fit: BoxFit.cover,
-            ),
+            image: (pet.imagePaths != null && pet.imagePaths!.isNotEmpty)
+                ? DecorationImage(
+                    image: NetworkImage(pet.imagePaths![0]),
+                    fit: BoxFit.cover,
+                  )
+                : null,
           ),
-          child: Icon(Icons.pets, size: 50, color: Colors.orange[400]),
+          child: (pet.imagePaths == null || pet.imagePaths!.isEmpty)
+              ? Icon(Icons.pets, size: 50, color: Colors.orange[400])
+              : null,
         ),
 
         title: Text(pet.petName ?? 'Pet Name'),
@@ -192,5 +248,30 @@ class _BrowsePetsState extends State<BrowsePets> {
         ),
       ),
     );
+  }
+
+  Future<void> loadPets() async {
+    try {
+      final fetchedPets = await http.get(
+        Uri.parse('${MyConfig.baseUrl}/pawpal/api/get_my_pets.php'),
+      );
+
+      var resArray = jsonDecode(fetchedPets.body);
+      if (resArray['status'] == 'success') {
+        var petsData = resArray['data'] as List;
+        setState(() {
+          isLoading = false;
+          listPets = petsData.map((petJson) => Pet.fromJson(petJson)).toList();
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }

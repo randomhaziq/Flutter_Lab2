@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pawpal/model/user.dart';
 import 'package:pawpal/pages/home_page.dart';
 import 'package:pawpal/pages/login_page.dart';
 import 'package:pawpal/pages/submitPetScreen.dart';
@@ -16,6 +17,22 @@ class PawPal extends StatefulWidget {
 }
 
 class _PawPalState extends State<PawPal> {
+  String userId = '';
+  String userName = '';
+  String userEmail = '';
+  String userPassword = '';
+  String userPhone = '';
+  String userRegDate = '';
+
+  User currentUser = User(
+    userId: '',
+    userName: '',
+    userEmail: '',
+    userPassword: '',
+    userPhone: '',
+    userRegDate: '',
+  );
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,7 +56,8 @@ class _PawPalState extends State<PawPal> {
           iconTheme: IconThemeData(color: Colors.white),
         ),
       ),
-      home: SubmitPetScreen(),
+      // home: SubmitPetScreen(currentUser: currentUser!),
+      home: BrowsePets(),
     );
   }
 }
