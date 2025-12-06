@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:pawpal/model/user.dart';
 import 'package:pawpal/myconfig.dart';
-import 'package:pawpal/pages/home_page.dart';
+import 'package:pawpal/pages/mainscreen.dart';
 
 class SubmitPetScreen extends StatefulWidget {
   final User currentUser;
@@ -33,7 +33,7 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Pet Adoption")),
+      appBar: AppBar(title: const Text("Pet Submission")),
       body: Row(
         children: [
           // Left side image
@@ -43,9 +43,8 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
               color: Colors.orange[100],
               child: Center(
                 child: Image.asset(
-                  'assets/images/.png', // TODO: change image
-                  width: 500,
-                  height: 500,
+                  'assets/images/pet_submission_image.png',
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -61,7 +60,7 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
-                    'Submit Your Pet for Adoption',
+                    'Submit A Pet',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -77,7 +76,12 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
                       controller: petNameController,
                       decoration: InputDecoration(
                         labelText: 'Pet Name',
-                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
                       ),
                     ),
                   ),
@@ -89,10 +93,15 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
                     child: DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Pet Type',
-                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
                       ),
                       initialValue: selectedPetType,
-                      items: <String>['Dog', 'Cat', 'Other'].map((
+                      items: <String>['Dog', 'Cat', 'Bird', 'Other'].map((
                         String value,
                       ) {
                         return DropdownMenuItem<String>(
@@ -116,7 +125,12 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
                     child: DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Submission Category',
-                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
                       ),
                       items:
                           <String>[
@@ -147,7 +161,12 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
                       maxLines: 2,
                       decoration: InputDecoration(
                         labelText: 'Description',
-                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
                       ),
                     ),
                   ),
@@ -164,7 +183,12 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
                           enabled: false,
                           decoration: InputDecoration(
                             labelText: 'Latitude',
-                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.orange),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.orange),
+                            ),
                           ),
                         ),
                       ),
@@ -176,7 +200,12 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
                           enabled: false,
                           decoration: InputDecoration(
                             labelText: 'Longitude',
-                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.orange),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.orange),
+                            ),
                           ),
                         ),
                       ),
@@ -191,7 +220,7 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
                                 .toStringAsFixed(6);
                           });
                         },
-                        iconSize: 50,
+                        iconSize: 40,
                         color: Colors.orange[400],
                       ),
                     ],
@@ -370,22 +399,6 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Pet submitted successfully!'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-
-    // TODO: Send data to backend with images
-    print('Pet Name: ${petNameController.text}');
-    print('Pet Type: $selectedPetType');
-    print('Category: $selectedSubmissionCategory');
-    print('Description: ${petDescriptionController.text}');
-    print('Latitude: ${latitudeController.text}');
-    print('Longitude: ${longitudeController.text}');
-    print('Images count: $imageCount');
-
     String userId = widget.currentUser.userId!;
     String petName = petNameController.text.trim();
     String petType = selectedPetType!;
@@ -393,7 +406,6 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
     String petDescription = petDescriptionController.text.trim();
     double latitude = double.parse(latitudeController.text);
     double longitude = double.parse(longitudeController.text);
-    petImages = petImages.where((img) => img != null).toList();
 
     uploadPetData(
       userId,
@@ -403,7 +415,7 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
       petDescription,
       latitude,
       longitude,
-      petImages as List<Uint8List>,
+      petImages,
     );
   }
 
@@ -453,7 +465,7 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
     String petDescription,
     double latitude,
     double longitude,
-    List<Uint8List> petImages,
+    List<Uint8List?> petImages,
   ) async {
     setState(() {
       isLoading = true;
@@ -475,84 +487,103 @@ class _SubmitPetScreenState extends State<SubmitPetScreen> {
       },
     );
 
-    await http
-        .post(
-          Uri.parse('${MyConfig.baseUrl}/pawpal/api/submit_pet.php'),
-          body: {
-            'user_id': userId,
-            'pet_name': petName,
-            'pet_type': petType,
-            'category': category,
-            'pet_description': petDescription,
-            'latitude': latitude.toString(),
-            'longitude': longitude.toString(),
-            'image_paths': jsonEncode(
-              petImages.map((img) => base64Encode(img)).toList(),
+    // Prepare body with individual image fields
+    Map<String, String> requestBody = {
+      'user_id': userId,
+      'pet_name': petName,
+      'pet_type': petType,
+      'category': category,
+      'description': petDescription,
+      'latitude': latitude.toString(),
+      'longitude': longitude.toString(),
+    };
+
+    // Add only non-null images with keys image1, image2, image3
+    int imageIndex = 1;
+    for (int i = 0; i < petImages.length; i++) {
+      if (petImages[i] != null) {
+        requestBody['image$imageIndex'] = base64Encode(petImages[i]!);
+        imageIndex++;
+      }
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('${MyConfig.baseUrl}/pawpal/api/submit_pet.php'),
+        body: requestBody,
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['status'] == 'success') {
+          if (!mounted) return;
+
+          // Close loading dialog
+          Navigator.of(context).pop();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.green,
+              content: Text('Pet submitted successfully!'),
+              duration: Duration(seconds: 2),
             ),
-          },
-        )
-        .then((response) {
-          if (response.statusCode == 200) {
-            var jsonResponse = jsonDecode(response.body);
-            if (jsonResponse['status'] == 'success') {
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  backgroundColor: Colors.green,
-                  content: Text('Pet submitted successfully!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+          );
 
-              if (isLoading) {
-                Navigator.of(context).pop(); //close the loading dialog
-                setState(() {
-                  isLoading = false;
-                });
-              }
+          // Delay redirect to allow SnackBar to show
+          await Future.delayed(Duration(seconds: 2));
+          if (!mounted) return;
 
-              Navigator.pop(context);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.red,
-                  content: Text(
-                    'Submission failed: ${jsonResponse['message']}',
-                  ),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            }
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: Colors.red,
-                content: Text('Server error: ${response.statusCode}'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          }
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BrowsePets(user: widget.currentUser),
+            ),
+          );
+        } else {
+          if (!mounted) return;
+          Navigator.of(context).pop();
 
-          if (isLoading) {
-            Navigator.of(context).pop();
-            setState(() {
-              isLoading = false;
-            });
-          }
-        })
-        .timeout(
-          Duration(seconds: 10),
-          onTimeout: () {
-            if (!mounted) return;
-            SnackBar snackBar = SnackBar(
-              content: Text("Request timed out. Please try again."),
-            );
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          },
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              content: Text('Submission failed: ${jsonResponse['message']}'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        if (!mounted) return;
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Server error: ${response.statusCode}'),
+            duration: Duration(seconds: 2),
+          ),
         );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+
+      print('Exception: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Error: $e'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }

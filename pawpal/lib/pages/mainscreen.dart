@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pawpal/model/pet.dart';
@@ -8,7 +7,8 @@ import 'package:pawpal/myconfig.dart';
 import 'package:pawpal/pages/submitPetScreen.dart';
 
 class BrowsePets extends StatefulWidget {
-  const BrowsePets({super.key});
+  final User? user;
+  const BrowsePets({super.key, this.user});
 
   @override
   State<BrowsePets> createState() => _BrowsePetsState();
@@ -23,13 +23,27 @@ class _BrowsePetsState extends State<BrowsePets> {
   @override
   void initState() {
     super.initState();
+    currentUser = widget.user;
     loadPets();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Browse Pets")),
+      appBar: AppBar(
+        title: const Text("Browse Pets"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              setState(() {
+                isLoading = true;
+              });
+              loadPets();
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           //top section
@@ -64,7 +78,7 @@ class _BrowsePetsState extends State<BrowsePets> {
                       onSubmitted: (value) => searchPets(value),
                     ),
                   ),
-                  SizedBox(width: 20),
+                  SizedBox(width: 100),
 
                   // Submit Pet Button
                   ElevatedButton(
@@ -94,7 +108,7 @@ class _BrowsePetsState extends State<BrowsePets> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 200),
+                  SizedBox(width: 100),
 
                   Text(
                     "Categories",
@@ -126,7 +140,11 @@ class _BrowsePetsState extends State<BrowsePets> {
                             color: Colors.orange[200],
                             shape: BoxShape.circle,
                           ),
-                          child: Image.asset('cat_category.png'),
+                          padding: const EdgeInsets.all(10),
+                          child: Image.asset(
+                            'assets/images/category/cat_category.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         SizedBox(width: 10),
 
@@ -138,7 +156,11 @@ class _BrowsePetsState extends State<BrowsePets> {
                             color: Colors.orange[200],
                             shape: BoxShape.circle,
                           ),
-                          child: Image.asset('dog_category.png'),
+                          padding: const EdgeInsets.all(10),
+                          child: Image.asset(
+                            'assets/images/category/dog_category.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         SizedBox(width: 10),
 
@@ -150,7 +172,11 @@ class _BrowsePetsState extends State<BrowsePets> {
                             color: Colors.orange[200],
                             shape: BoxShape.circle,
                           ),
-                          child: Image.asset('bird_category.png'),
+                          padding: const EdgeInsets.all(10),
+                          child: Image.asset(
+                            'assets/images/category/bird_category.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         SizedBox(width: 10),
 
@@ -162,7 +188,11 @@ class _BrowsePetsState extends State<BrowsePets> {
                             color: Colors.orange[200],
                             shape: BoxShape.circle,
                           ),
-                          child: Image.asset('other_category.png'),
+                          padding: const EdgeInsets.all(10),
+                          child: Image.asset(
+                            'assets/images/category/more_category.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         SizedBox(width: 10),
                       ],
@@ -178,7 +208,7 @@ class _BrowsePetsState extends State<BrowsePets> {
             child: isLoading
                 ? Center(child: CircularProgressIndicator())
                 : listPets.isEmpty
-                ? Center(child: Text('No pets available'))
+                ? Center(child: Text('No submissions yet.'))
                 : ListView.builder(
                     itemCount: (listPets.length / 2).ceil(),
                     scrollDirection: Axis.vertical,
@@ -213,6 +243,8 @@ class _BrowsePetsState extends State<BrowsePets> {
 
     Pet pet = listPets[index];
     return Card(
+      color: Colors.orange[100],
+      elevation: 5,
       margin: const EdgeInsets.all(10),
       child: ListTile(
         leading: Container(
@@ -221,19 +253,33 @@ class _BrowsePetsState extends State<BrowsePets> {
           decoration: BoxDecoration(
             color: Colors.grey[300],
             borderRadius: BorderRadius.circular(8),
-            image: (pet.imagePaths != null && pet.imagePaths!.isNotEmpty)
-                ? DecorationImage(
-                    image: NetworkImage(pet.imagePaths![0]),
-                    fit: BoxFit.cover,
-                  )
-                : null,
           ),
-          child: (pet.imagePaths == null || pet.imagePaths!.isEmpty)
-              ? Icon(Icons.pets, size: 50, color: Colors.orange[400])
-              : null,
+          child: (pet.imagePaths != null && pet.imagePaths!.isNotEmpty)
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    '${MyConfig.baseUrl}/${pet.imagePaths![0]}',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      print('Error loading image: $error');
+                      return Icon(
+                        Icons.broken_image,
+                        size: 50,
+                        color: Colors.grey,
+                      );
+                    },
+                  ),
+                )
+              : Icon(Icons.pets, size: 50, color: Colors.orange[400]),
         ),
 
-        title: Text(pet.petName ?? 'Pet Name'),
+        title: Text(
+          pet.petName ?? 'Pet Name',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Bubblegum Sans',
+          ),
+        ),
 
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,7 +287,7 @@ class _BrowsePetsState extends State<BrowsePets> {
             Text('Type: ${pet.petType ?? 'Unknown'}'),
             Text('Category: ${pet.category ?? 'Unknown'}'),
             Text(
-              'Description: ${pet.petDescription ?? 'No description'}',
+              'Description: ${pet.description ?? 'No description'}',
               style: TextStyle(overflow: TextOverflow.ellipsis),
             ),
           ],

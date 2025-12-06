@@ -254,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
       // Navigate to mainscreen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => BrowsePets()),
+        MaterialPageRoute(builder: (context) => BrowsePets(user: user)),
       );
     }
 

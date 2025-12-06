@@ -1,41 +1,57 @@
 <?php
 header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
 include 'dbconnect.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     http_response_code(405);
-    echo json_encode(array('error' => 'Method Not Allowed'));
+    echo json_encode(array('status' => 'failed', 'error' => 'Method Not Allowed'));
     exit();
 }
 
-$user_id = $_POST['user_id'];
-$pet_name = addslashes($_POST['pet_name']);
-$pet_type = $_POST['pet_type'];
-$category = $_POST['category'];
-$pet_description = addslashes($_POST['pet_description']);
-$latitude = $_POST['latitude'];
-$longitude = $_POST['longitude'];
+$user_id = isset($_POST['user_id']) ? $_POST['user_id'] : '';
+$pet_name = isset($_POST['pet_name']) ? addslashes($_POST['pet_name']) : '';
+$pet_type = isset($_POST['pet_type']) ? $_POST['pet_type'] : '';
+$category = isset($_POST['category']) ? $_POST['category'] : '';
+$description = isset($_POST['description']) ? addslashes($_POST['description']) : '';
+$lat = isset($_POST['latitude']) ? $_POST['latitude'] : '';
+$lng = isset($_POST['longitude']) ? $_POST['longitude'] : '';
+
+// Validate required fields
+if (empty($user_id) || empty($pet_name)) {
+    echo json_encode(array('status' => 'failed', 'message' => 'Missing required fields'));
+    exit();
+}
 
 $image_paths = [];
 
-$sqlinsertpet = "INSERT INTO `tbl_pets`(`user_id`, `pet_name`, 'pet_type', `category`, `pet_description`, `latitude`, `longitude`) VALUES ('$user_id', '$pet_name', '$pet_type', '$category', '$pet_description', '$latitude', '$longitude')";
+$sqlinsertpet = "INSERT INTO `tbl_pets`(`user_id`, `pet_name`, `pet_type`, `category`, `description`, `lat`, `lng`) VALUES ('$user_id', '$pet_name', '$pet_type', '$category', '$description', '$lat', '$lng')";
 
 try {
     if ($conn->query($sqlinsertpet) === TRUE) {
         $pet_id = $conn->insert_id;
 
+        // Process images if any
         for ($i = 1; $i <= 3; $i++) {
             $image_key = 'image' . $i;
             
             if (isset($_POST[$image_key]) && !empty($_POST[$image_key])) {
-                $encodedimage = base64_decode($_POST[$image_key]);
+                $encodedimage = base64_decode($_POST[$image_key], true);
                 
                 if ($encodedimage !== false) {
-                    $path = "../assets/images/pets/pet_" . $pet_id . "_" . $i . ".jpg";
+                    // Ensure uploads directory exists
+                    $uploads_dir = "../assets/images/uploads";
+                    if (!is_dir($uploads_dir)) {
+                        mkdir($uploads_dir, 0755, true);
+                    }
+                    
+                    $filename = "pet_" . $pet_id . "_" . $i . ".jpg";
+                    $path = $uploads_dir . "/" . $filename;
                     $result = file_put_contents($path, $encodedimage);
                     
                     if ($result !== false) {
-                        $image_paths[] = $path;
+                        // Store URL-friendly path (relative to server root)
+                        $image_paths[] = "pawpal/assets/images/uploads/" . $filename;
                     }
                 }
             }
@@ -48,14 +64,14 @@ try {
             $conn->query($sqlupdate);
         }
         
-        $response = array('status' => 'success', 'message' => 'Pet submitted successfully', 'pet_id' => $last_id);
+        $response = array('status' => 'success', 'message' => 'Pet submitted successfully', 'pet_id' => $pet_id);
         sendJsonResponse($response);
     } else {
         $response = array('status' => 'failed', 'message' => 'Pet not added: ' . $conn->error);
         sendJsonResponse($response);
     }
 } catch(Exception $e) {
-    $response = array('status' => 'failed', 'message' => $e->getMessage());
+    $response = array('status' => 'failed', 'message' => 'Exception: ' . $e->getMessage());
     sendJsonResponse($response);
 }
 

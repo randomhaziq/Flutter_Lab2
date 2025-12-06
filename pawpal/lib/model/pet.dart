@@ -1,14 +1,16 @@
+import 'dart:convert';
+
 class Pet {
   String? petId;
   String? userId;
   String? petName;
   String? petType;
   String? category;
-  String? petDescription;
-  String? imagePaths;
-  String? petLatitude;
-  String? petLongitude;
-  String? petDate;
+  String? description;
+  List<dynamic>? imagePaths;
+  String? lat;
+  String? lng;
+  String? createdAt;
 
   Pet({
     this.petId,
@@ -16,24 +18,38 @@ class Pet {
     this.petName,
     this.petType,
     this.category,
-    this.petDescription,
+    this.description,
     this.imagePaths,
-    this.petLatitude,
-    this.petLongitude,
-    this.petDate,
+    this.lat,
+    this.lng,
+    this.createdAt,
   });
 
   Pet.fromJson(Map<String, dynamic> json) {
-    petId = json['pet_id'];
-    userId = json['user_id'];
+    petId = json['pet_id']?.toString();
+    userId = json['user_id']?.toString();
     petName = json['pet_name'];
     petType = json['pet_type'];
     category = json['category'];
-    petDescription = json['description'];
-    imagePaths = json['image_paths'];
-    petLatitude = json['lat'];
-    petLongitude = json['lng'];
-    petDate = json['created_at'];
+    description = json['description'];
+
+    // Handle imagePaths - backend returns it as List (already json_decoded in PHP)
+    if (json['image_paths'] is List) {
+      imagePaths = json['image_paths'] as List;
+    } else if (json['image_paths'] is String) {
+      try {
+        imagePaths = jsonDecode(json['image_paths']) as List;
+      } catch (e) {
+        imagePaths = [];
+      }
+    } else {
+      imagePaths = [];
+    }
+
+    // Handle latitude/longitude - database uses 'latitude' and 'longitude'
+    lat = json['latitude']?.toString() ?? json['lat']?.toString();
+    lng = json['longitude']?.toString() ?? json['lng']?.toString();
+    createdAt = json['created_at'];
   }
 
   Map<String, dynamic> toJson() {
@@ -43,11 +59,11 @@ class Pet {
     data['pet_name'] = petName;
     data['pet_type'] = petType;
     data['category'] = category;
-    data['description'] = petDescription;
+    data['description'] = description;
     data['image_paths'] = imagePaths;
-    data['lat'] = petLatitude;
-    data['lng'] = petLongitude;
-    data['created_at'] = petDate;
+    data['lat'] = lat;
+    data['lng'] = lng;
+    data['created_at'] = createdAt;
     return data;
   }
 }
